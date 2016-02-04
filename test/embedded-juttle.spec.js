@@ -5,7 +5,7 @@ let expect = require('chai').expect;
 let _ = require('underscore');
 
 describe('Embedded Juttle', function() {
-    describe('streaming', () => {
+    describe('wait false', () => {
         it('no points', (done) => {
             let juttle = new EmbeddedJuttle('put v2 = v | view table');
             juttle.on('end', () => {
@@ -69,7 +69,7 @@ describe('Embedded Juttle', function() {
         });
     });
 
-    describe('batch', () => {
+    describe('wait true', () => {
         it('two points', () => {
             const points = [
                 {
@@ -82,9 +82,10 @@ describe('Embedded Juttle', function() {
                 }
             ];
 
-            return EmbeddedJuttle.runBatch('put v2 = v | view table', points)
-                .then((result) => {
+            let juttle = new EmbeddedJuttle('put v2 = v | view table');
 
+            return juttle.run({ wait: true, points: points })
+                .then((result) => {
                     const expectedViewOutput = {
                         type: 'table',
                         options: {},
@@ -117,11 +118,10 @@ describe('Embedded Juttle', function() {
                 time: new Date(1000)
             };
 
-            return EmbeddedJuttle.runBatch(
-                '(put forView = "barchart" | view barchart; put forView = "timechart" | view timechart)',
-                [ point ])
-                .then((result) => {
+            let juttle = new EmbeddedJuttle('(put forView = "barchart" | view barchart; put forView = "timechart" | view timechart)');
 
+            return juttle.run({ wait: true, points: [ point ] })
+                .then((result) => {
                     const expectedViewOutputForTimechart = {
                         type: 'timechart',
                         options: {},
@@ -152,7 +152,6 @@ describe('Embedded Juttle', function() {
 
                     expect(_.findWhere(_.values(result.output), { type: 'timechart' })).to.deep.equal(expectedViewOutputForTimechart);
                     expect(_.findWhere(_.values(result.output), { type: 'barchart' })).to.deep.equal(expectedViewOutputForBarchart);
-
                 });
         });
     });

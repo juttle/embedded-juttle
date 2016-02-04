@@ -22,13 +22,17 @@ Run some juttle on some data...right in your browser.
                 }
             ];
 
-            EmbeddedJuttle.runBatch('put v2 = v | view table', points)
-                .then((result) => {
-                    console.log(JSON.stringify(result, null, 2));
-                })
-                .catch((err) => {
-                    console.log("got an error trying to do runBatch: " + err);
-                });
+            let juttle = new EmbeddedJuttle('put v2 = v | view table');
+
+            juttle.run({
+                wait: true,
+                points
+            }).then((result) => {
+                console.log(JSON.stringify(result, null, 2));
+            })
+            .catch((err) => {
+                console.log("got an error trying to do runBatch: " + err);
+            });
         </script>
     </body>
 </html>

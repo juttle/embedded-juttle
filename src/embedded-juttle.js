@@ -28,7 +28,12 @@ class EmbeddedJuttle {
         this._juttleSource = juttleSource;
     }
 
-    run() {
+    run(options) {
+        options = _.defaults(options || {}, {
+            wait: false,
+            points: []
+        });
+
         let juttleSource = `read embedded -id ${this._id} | ${this._juttleSource} `;
 
         return compiler.compile(juttleSource, COMPILE_OPTIONS)
@@ -45,14 +50,19 @@ class EmbeddedJuttle {
                 };
             });
 
-            // pass through all events from the program
-            program.events.on('all', (eventName, data) => {
-                this._events.emit(eventName, JSPDValueConverter.convertToJSDPValue(data));
-            });
+            if (options.wait) {
+                return this._activateAndGatherResults(program, options.points);
+            }
+            else {
+                // pass through all events from the program
+                program.events.on('all', (eventName, data) => {
+                    this._events.emit(eventName, JSPDValueConverter.convertToJSDPValue(data));
+                });
 
-            program.done().then(() => this._events.emit('end'));
-
-            return program.activate();
+                program.done().then(() => this._events.emit('end'));
+                program.activate();
+                this.sendPoints(options.points);
+            }
         });
     }
 
@@ -76,66 +86,58 @@ class EmbeddedJuttle {
         this._events.on(type, handler, context);
     }
 
-    static runBatch(juttleSource, points) {
-        let juttle = new EmbeddedJuttle(juttleSource);
+    _activateAndGatherResults(program, points) {
+        let output = _.mapObject(this.getViews(), (value) => {
+            value.data = [];
+            return value;
+        });
 
-        let output = {};
         let warnings = [];
         let errors = [];
 
-        let programDone = null;
-
-        juttle.on('view:points', (payload) => {
+        program.events.on('view:points', (payload) => {
             payload.points.forEach((point) => {
-                output[payload.channel].data.push({
+                output[payload.channel].data.push(JSPDValueConverter.convertToJSDPValue({
                     type: 'point',
                     point: point
-                });
+                }));
             });
         });
 
-        juttle.on('view:mark', (payload) => {
-            output[payload.channel].data.push({
+        program.events.on('view:mark', (payload) => {
+            output[payload.channel].data.push(JSPDValueConverter.convertToJSDPValue({
                 type: 'mark',
                 time: payload.time
-            });
+            }));
         });
 
-        juttle.on('view:tick', (payload) => {
-            output[payload.channel].data.push({
+        program.events.on('view:tick', (payload) => {
+            output[payload.channel].data.push(JSPDValueConverter.convertToJSDPValue({
                 type: 'tick',
                 time: payload.time
-            });
+            }));
         });
 
-        juttle.on('error', (payload) => {
+        program.events.on('error', (payload) => {
             errors.push(payload);
         });
 
-        juttle.on('warning', (payload) => {
+        program.events.on('warning', (payload) => {
             warnings.push(payload);
         });
 
-        juttle.on('end', () => {
-            programDone({
+        program.activate();
+
+        this.sendPoints(points);
+        this.stop();
+
+        return program.done().then(() => {
+            return {
                 output,
                 warnings,
                 errors
-            });
+            };
         });
-
-        return juttle.run()
-            .then(() => {
-                output = _.mapObject(juttle.getViews(), (value) => {
-                    value.data = [];
-                    return value;
-                });
-                juttle.sendPoints(points);
-                juttle.stop();
-                return new Promise(function(resolve, reject) {
-                    programDone = resolve;
-                });
-            });
     }
 }
 
