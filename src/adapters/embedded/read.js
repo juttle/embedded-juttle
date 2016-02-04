@@ -13,7 +13,7 @@ function configure(config) {
             config.events.on('points' + options.id, this._onReceivePoints, this);
             config.events.on('eof' + options.id, this._onReceiveEOF, this);
 
-            this._pendingReadPromise = null;
+            this._pendingReadResolve = null;
             this._buffer = [];
         }
 
@@ -50,12 +50,12 @@ function configure(config) {
         }
 
         read(from, to, limit, state) {
-            // if theres a pending EOF, send the rest of the points
-            // and signal that there will be no more
-            if (this._pendingEOF) {
+            // if theres a pending EOF or buffered points,
+            // resolve immediately
+            if (this._pendingEOF || this._buffer.length !== 0) {
                 return Promise.resolve({
                     points: this._buffer.slice(),
-                    readEnd: endMoment
+                    readEnd: this._pendingEOF ? endMoment : null
                 });
             }
 
