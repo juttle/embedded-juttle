@@ -1,5 +1,7 @@
 # Embedded Juttle
 
+[![Build Status](https://travis-ci.org/juttle/embedded-juttle.svg?branch=master)](https://travis-ci.org/juttle/embedded-juttle)
+
 Run some [Juttle](https://github.com/juttle/juttle) on some data...right in your browser.
 
 ## Installation
