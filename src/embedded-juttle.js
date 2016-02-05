@@ -4,7 +4,7 @@ let _ = require('underscore');
 let Juttle = require('juttle/lib/runtime').Juttle;
 let compiler = require('juttle/lib/compiler');
 let implicit_views = require('juttle/lib/compiler/flowgraph/implicit_views');
-let JSPDValueConverter = require('juttle-engine/lib/jsdp-value-converter');
+let JSPDValueConverter = require('./jsdp-value-converter');
 
 let EventEmitter = require('eventemitter3');
 
