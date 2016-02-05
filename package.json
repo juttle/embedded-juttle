@@ -1,6 +1,6 @@
 {
   "name": "embedded-juttle",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Run some juttle on some data...right in your browser.",
   "tags": [
     "juttle",
