@@ -1,10 +1,8 @@
 'use strict';
 
-var AdapterRead = require('juttle/lib/runtime/adapter-read');
-let Promise = require('bluebird');
-let JuttleMoment = require('juttle/lib/moment').JuttleMoment;
+var AdapterRead = require('juttle/lib/adapters/api').AdapterRead;
 
-const endMoment = new JuttleMoment({raw: Infinity});
+let Promise = require('bluebird');
 
 function configure(config) {
     class EmbeddedRead extends AdapterRead {
@@ -17,13 +15,17 @@ function configure(config) {
             this._buffer = [];
         }
 
+        static allowedOptions() {
+            return [ 'id' ];
+        }
+
         _onReceiveEOF() {
             // if theres a pending read, grab the points in the buffer
             // and signal that there will be no more
             if (this._pendingReadResolve) {
                 this._pendingReadResolve({
                     points: this._buffer.slice(),
-                    readEnd: endMoment
+                    eof: true
                 });
             }
             // else set a flag that theres a pending EOF and we'll
@@ -55,7 +57,7 @@ function configure(config) {
             if (this._pendingEOF || this._buffer.length !== 0) {
                 return Promise.resolve({
                     points: this._buffer.slice(),
-                    readEnd: this._pendingEOF ? endMoment : null
+                    eof: this._pendingEOF
                 });
             }
 
