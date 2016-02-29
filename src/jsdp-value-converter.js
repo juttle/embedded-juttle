@@ -1,4 +1,4 @@
-var JuttleMoment = require('juttle/lib/moment').JuttleMoment;
+var JuttleMoment = require('juttle/lib/runtime/types').JuttleMoment;
 var moment = require('moment');
 var _ = require('underscore');
 

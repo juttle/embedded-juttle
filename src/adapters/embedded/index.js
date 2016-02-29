@@ -1,4 +1,4 @@
-function EmbeddedAdapter(config, Juttle) {
+function EmbeddedAdapter(config) {
     return {
         name: 'embedded',
         read: require('./read')(config)

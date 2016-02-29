@@ -1,7 +1,7 @@
 'use strict';
 
 let _ = require('underscore');
-let Juttle = require('juttle/lib/runtime').Juttle;
+let JuttleAdapters = require('juttle/lib/runtime/adapters');
 let compiler = require('juttle/lib/compiler');
 let implicit_views = require('juttle/lib/compiler/flowgraph/implicit_views');
 let JSPDValueConverter = require('./jsdp-value-converter');
@@ -10,7 +10,7 @@ let EventEmitter = require('eventemitter3');
 
 let adapterEvents = new EventEmitter();
 
-Juttle.adapters.register('embedded', require('./adapters/embedded')({
+JuttleAdapters.register('embedded', require('./adapters/embedded')({
     events: adapterEvents
 }));
 
@@ -54,9 +54,16 @@ class EmbeddedJuttle {
                 return this._activateAndGatherResults(program, options.points);
             }
             else {
-                // pass through all events from the program
-                program.events.on('all', (eventName, data) => {
-                    this._events.emit(eventName, JSPDValueConverter.convertToJSDPValue(data));
+                program.events.on('view:points', (data) => {
+                    this._events.emit('view:points', JSPDValueConverter.convertToJSDPValue(data));
+                });
+
+                program.events.on('view:mark', (data) => {
+                    this._events.emit('view:mark', JSPDValueConverter.convertToJSDPValue(data));
+                });
+
+                program.events.on('view:tick', (data) => {
+                    this._events.emit('view:tick', JSPDValueConverter.convertToJSDPValue(data));
                 });
 
                 program.done().then(() => this._events.emit('end'));
