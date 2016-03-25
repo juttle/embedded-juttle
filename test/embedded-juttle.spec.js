@@ -48,7 +48,7 @@ describe('Embedded Juttle', function() {
 
             juttle.on('view:points', (payload) => {
                 expect(views[payload.channel].type).to.equal('table');
-                receivedPoints = receivedPoints.concat(payload.points);
+                receivedPoints = receivedPoints.concat(payload.data);
             });
 
             juttle.on('end', () => {
@@ -88,11 +88,17 @@ describe('Embedded Juttle', function() {
                 .then((result) => {
                     const expectedViewOutput = {
                         type: 'table',
-                        options: {},
+                        options: {
+                            _jut_time_bounds: [{
+                                last: null,
+                                from: null,
+                                to: null
+                            }]
+                        },
                         data: [
                             {
                                 type: 'point',
-                                point: {
+                                data: {
                                     time: new Date(1000),
                                     v: 1,
                                     v2: 1
@@ -100,7 +106,7 @@ describe('Embedded Juttle', function() {
                             },
                             {
                                 type: 'point',
-                                point: {
+                                data: {
                                     time: new Date(2000),
                                     v: 2,
                                     v2: 2
@@ -124,11 +130,17 @@ describe('Embedded Juttle', function() {
                 .then((result) => {
                     const expectedViewOutputForTimechart = {
                         type: 'timechart',
-                        options: {},
+                        options: {
+                            _jut_time_bounds: [{
+                                last: null,
+                                from: null,
+                                to: null
+                            }]
+                        },
                         data: [
                             {
                                 type: 'point',
-                                point: {
+                                data: {
                                     time: new Date(1000),
                                     forView: 'timechart'
                                 }
@@ -138,11 +150,17 @@ describe('Embedded Juttle', function() {
 
                     const expectedViewOutputForBarchart = {
                         type: 'barchart',
-                        options: {},
+                        options: {
+                            _jut_time_bounds: [{
+                                last: null,
+                                from: null,
+                                to: null
+                            }]
+                        },
                         data: [
                             {
                                 type: 'point',
-                                point: {
+                                data: {
                                     time: new Date(1000),
                                     forView: 'barchart'
                                 }

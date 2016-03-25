@@ -54,7 +54,7 @@ prints
       "data": [
         {
           "type": "point",
-          "point": {
+          "data": {
             "time": "1970-01-01T00:00:01.000Z",
             "v": 1,
             "v2": 1
@@ -62,7 +62,7 @@ prints
         },
         {
           "type": "point",
-          "point": {
+          "data": {
             "time": "1970-01-01T00:00:02.000Z",
             "v": 2,
             "v2": 2

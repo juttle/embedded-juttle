@@ -3,7 +3,6 @@
 let _ = require('underscore');
 let JuttleAdapters = require('juttle/lib/runtime/adapters');
 let compiler = require('juttle/lib/compiler');
-let implicit_views = require('juttle/lib/compiler/flowgraph/implicit_views');
 let JSPDValueConverter = require('./jsdp-value-converter');
 
 let EventEmitter = require('eventemitter3');
@@ -15,11 +14,6 @@ JuttleAdapters.register('embedded', require('./adapters/embedded')({
 }));
 
 let programCounter = 0;
-
-const COMPILE_OPTIONS = {
-    stage: 'eval',
-    fg_processors: [implicit_views()]
-};
 
 class EmbeddedJuttle {
     constructor(juttleSource) {
@@ -36,7 +30,7 @@ class EmbeddedJuttle {
 
         let juttleSource = `read embedded -id ${this._id} | ${this._juttleSource} `;
 
-        return compiler.compile(juttleSource, COMPILE_OPTIONS)
+        return compiler.compile(juttleSource)
         .then((program) => {
 
             this._program = program;
@@ -103,10 +97,10 @@ class EmbeddedJuttle {
         let errors = [];
 
         program.events.on('view:points', (payload) => {
-            payload.points.forEach((point) => {
+            payload.data.forEach((point) => {
                 output[payload.channel].data.push(JSPDValueConverter.convertToJSDPValue({
                     type: 'point',
-                    point: point
+                    data: point
                 }));
             });
         });
@@ -114,14 +108,14 @@ class EmbeddedJuttle {
         program.events.on('view:mark', (payload) => {
             output[payload.channel].data.push(JSPDValueConverter.convertToJSDPValue({
                 type: 'mark',
-                time: payload.time
+                data: payload.data
             }));
         });
 
         program.events.on('view:tick', (payload) => {
             output[payload.channel].data.push(JSPDValueConverter.convertToJSDPValue({
                 type: 'tick',
-                time: payload.time
+                data: payload.data
             }));
         });
 
